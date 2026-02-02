@@ -21,15 +21,31 @@ export default function ConversationDeck() {
   const [activeTab, setActiveTab] = useState("play")
   const [isHelpOpen, setIsHelpOpen] = useState(false)
 
+  const PRESET_DECK: Deck = {
+    id: "preset-1",
+    name: "はじめての会話デッキ",
+    cards: [
+      { id: "c1", text: "最近あった、ちょっといい話" },
+      { id: "c2", text: "最近のマイブーム" },
+      { id: "c3", text: "自分だけのこだわり" },
+      { id: "c4", text: "笑える失敗談" }
+    ]
+  }
+
+  // 初期読み込み
   useEffect(() => {
     const saved = localStorage.getItem("conv-decks")
     if (saved) {
       const parsed = JSON.parse(saved)
       setDecks(parsed)
       if (parsed.length > 0) setSelectedDeckId(parsed[0].id)
+    } else {
+      setDecks([PRESET_DECK])
+      setSelectedDeckId(PRESET_DECK.id)
     }
   }, [])
 
+  // 保存（空の配列も保存できるように if 文を削除）
   useEffect(() => {
     localStorage.setItem("conv-decks", JSON.stringify(decks))
   }, [decks])
@@ -57,6 +73,16 @@ export default function ConversationDeck() {
     setNewDeckName("")
     setSelectedDeckId(newDeck.id)
     setActiveTab("edit")
+  }
+
+  const deleteDeck = (id: string) => {
+    const updatedDecks = decks.filter(d => d.id !== id)
+    setDecks(updatedDecks)
+    if (updatedDecks.length > 0) {
+      setSelectedDeckId(updatedDecks[0].id)
+    } else {
+      setSelectedDeckId("")
+    }
   }
 
   const addCard = () => {
@@ -148,6 +174,7 @@ export default function ConversationDeck() {
                   <ChevronRight size={20} />
                 </button>
               ))}
+              {decks.length === 0 && <p className="text-center py-20 text-zinc-300 text-xs italic">デッキがありません</p>}
             </div>
           </TabsContent>
 
@@ -155,35 +182,30 @@ export default function ConversationDeck() {
             <section className="space-y-3">
               <h3 className="text-[10px] font-bold text-zinc-300 tracking-[0.2em] uppercase">会話デッキを新規作成</h3>
               <div className="flex gap-2">
-                <Input 
-                  placeholder="新しい会話デッキ名..." 
-                  value={newDeckName} 
-                  onChange={(e) => setNewDeckName(e.target.value)} 
-                  className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5"
-                />
+                <Input placeholder="新しい会話デッキ名..." value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5" />
                 <Button onClick={addDeck} className="bg-zinc-900 text-white h-14 w-14 rounded-2xl shrink-0"><Plus size={24}/></Button>
               </div>
             </section>
-
             <section className="space-y-6">
-              <h3 className="text-[10px] font-bold text-zinc-300 tracking-[0.2em] uppercase">カード編集：{selectedDeck?.name || "未選択"}</h3>
+              <h3 className="text-[10px] font-bold text-zinc-300 tracking-[0.2em] uppercase">デッキ編集</h3>
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {decks.map(d => (
-                  <button key={d.id} onClick={() => setSelectedDeckId(d.id)} className={`px-5 py-2.5 rounded-xl text-xs font-bold border whitespace-nowrap ${selectedDeckId === d.id ? "bg-zinc-100 border-zinc-200 text-zinc-900" : "bg-white border-zinc-100 text-zinc-300"}`}>
-                    {d.name}
-                  </button>
+                  <div key={d.id} className="relative group shrink-0">
+                    <button onClick={() => setSelectedDeckId(d.id)} className={`px-5 py-2.5 rounded-xl text-xs font-bold border transition-all ${selectedDeckId === d.id ? "bg-zinc-100 border-zinc-200 text-zinc-900 pr-10" : "bg-white border-zinc-100 text-zinc-300"}`}>
+                      {d.name}
+                    </button>
+                    {selectedDeckId === d.id && (
+                      <button onClick={(e) => { e.stopPropagation(); deleteDeck(d.id); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500">
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
-
               {selectedDeck && (
                 <div className="space-y-4">
                   <div className="flex gap-2">
-                    <Input 
-                      placeholder="会話カードを追加..." 
-                      value={newCardText} 
-                      onChange={(e) => setNewCardText(e.target.value)} 
-                      className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5"
-                    />
+                    <Input placeholder="会話カードを追加..." value={newCardText} onChange={(e) => setNewCardText(e.target.value)} className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5" />
                     <Button onClick={addCard} className="bg-zinc-100 text-zinc-900 h-14 w-14 rounded-2xl shrink-0"><Plus size={24}/></Button>
                   </div>
                   <div className="space-y-2 max-h-[35vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -201,57 +223,26 @@ export default function ConversationDeck() {
         </Tabs>
       </div>
 
-      {/* 使い方ボタン */}
       <footer className="py-4 flex justify-center">
-        <Button 
-          variant="ghost" 
-          onClick={() => setIsHelpOpen(true)}
-          className="text-zinc-300 hover:text-zinc-900 hover:bg-transparent text-[10px] font-bold tracking-widest gap-1 transition-colors"
-        >
+        <Button variant="ghost" onClick={() => setIsHelpOpen(true)} className="text-zinc-300 hover:text-zinc-900 hover:bg-transparent text-[10px] font-bold tracking-widest gap-1 transition-colors">
           <HelpCircle size={14} /> 使い方
         </Button>
       </footer>
 
-      {/* 使い方モーダル */}
       <AnimatePresence>
         {isHelpOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            onClick={() => setIsHelpOpen(false)}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-8"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }} 
-              animate={{ scale: 1, y: 0 }} 
-              exit={{ scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl border border-zinc-100 space-y-6 relative"
-            >
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setIsHelpOpen(false)}
-                className="absolute top-6 right-6 text-zinc-300 hover:text-zinc-900 rounded-full"
-              >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsHelpOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-8">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl border border-zinc-100 space-y-6 relative">
+              <Button variant="ghost" size="sm" onClick={() => setIsHelpOpen(false)} className="absolute top-6 right-6 text-zinc-300 hover:text-zinc-900 rounded-full">
                 <X size={20} />
               </Button>
-
               <h2 className="text-xl font-bold text-zinc-900 border-b border-zinc-50 pb-4">Dialogue Deck の使い方</h2>
-              
               <div className="space-y-5 text-sm text-zinc-600 leading-relaxed font-medium">
                 <p>1. <strong>「編成」タブ</strong>で新しい会話デッキを作成し、会話カードを追加してください。</p>
                 <p>2. <strong>「選択」タブ</strong>で使用したいデッキをタップして選びます。</p>
                 <p>3. <strong>「PLAY」タブ</strong>でカードをタップ、またはスワイプして次の話題へ進みましょう。</p>
               </div>
-
-              <Button 
-                onClick={() => setIsHelpOpen(false)} 
-                className="w-full bg-zinc-900 text-white rounded-2xl h-14 font-bold shadow-lg shadow-zinc-200 active:scale-95 transition-all"
-              >
-                対話を始める
-              </Button>
+              <Button onClick={() => setIsHelpOpen(false)} className="w-full bg-zinc-900 text-white rounded-2xl h-14 font-bold shadow-lg shadow-zinc-200 active:scale-95 transition-all">対話を始める</Button>
             </motion.div>
           </motion.div>
         )}
