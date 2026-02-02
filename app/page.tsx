@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Shuffle, Trash2, Heart, Spades } from "lucide-react"
+import { Plus, Shuffle, Trash2, Heart } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 type ConversationCard = { id: string; text: string }
