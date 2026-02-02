@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Shuffle, Trash2, ChevronRight } from "lucide-react"
+import { Plus, Shuffle, Trash2, ChevronRight, HelpCircle, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 type ConversationCard = { id: string; text: string }
@@ -19,6 +19,7 @@ export default function ConversationDeck() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [direction, setDirection] = useState(0)
   const [activeTab, setActiveTab] = useState("play")
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem("conv-decks")
@@ -65,8 +66,8 @@ export default function ConversationDeck() {
   }
 
   return (
-    <main className="min-h-[100dvh] bg-white text-zinc-900 px-4 py-2 font-sans antialiased tracking-tight">
-      <div className="max-w-md mx-auto space-y-2">
+    <main className="min-h-[100dvh] bg-white text-zinc-900 px-4 py-2 font-sans antialiased tracking-tight flex flex-col">
+      <div className="max-w-md mx-auto w-full space-y-2 flex-grow">
         <header className="py-1 border-b border-zinc-100 flex flex-col items-center">
           <h1 className="text-lg font-bold tracking-[0.3em] uppercase">Dialogue Deck</h1>
           <p className="text-[9px] font-medium text-zinc-400 tracking-widest">会話デッキでトーク</p>
@@ -75,7 +76,6 @@ export default function ConversationDeck() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-center mb-4">
             <TabsList className="bg-zinc-100/50 p-1 rounded-xl h-11 w-full max-w-[320px]">
-              {/* PLAYタブをクールな黒へ変更 */}
               <TabsTrigger value="play" className="w-full rounded-lg py-1.5 text-xs font-bold data-[state=active]:bg-zinc-900 data-[state=active]:text-white text-zinc-400 transition-all uppercase">PLAY</TabsTrigger>
               <TabsTrigger value="select" className="w-full rounded-lg py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-zinc-900 text-zinc-400 transition-all">選択</TabsTrigger>
               <TabsTrigger value="edit" className="w-full rounded-lg py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-zinc-900 text-zinc-400 transition-all">編成</TabsTrigger>
@@ -84,7 +84,7 @@ export default function ConversationDeck() {
 
           <TabsContent value="play" className="m-0 outline-none">
             {selectedDeck?.cards && selectedDeck.cards.length > 0 ? (
-              <div className="relative min-h-[82dvh] py-8 bg-zinc-50 rounded-[40px] flex flex-col items-center justify-between border border-zinc-100 shadow-inner px-4">
+              <div className="relative min-h-[78dvh] py-8 bg-zinc-50 rounded-[40px] flex flex-col items-center justify-between border border-zinc-100 shadow-inner px-4">
                 <div className="relative w-full aspect-[4/5] z-10">
                   <AnimatePresence initial={false} custom={direction}>
                     <motion.div
@@ -93,14 +93,14 @@ export default function ConversationDeck() {
                       initial={{ opacity: 0, x: direction >= 0 ? 300 : -300 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: direction >= 0 ? -300 : 300 }}
-                      transition={{ type: "spring", stiffness: 450, damping: 35 }} // 剛性を高めてシュパッと動作
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
                       drag="x"
                       dragConstraints={{ left: 0, right: 0 }}
                       onDragEnd={(_, info) => {
                         if (info.offset.x < -100) paginate(1)
                         else if (info.offset.x > 100) paginate(-1)
                       }}
-                      onClick={() => paginate(1)} // タップでも次へ移動
+                      onClick={() => paginate(1)}
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                     >
                       <Card className="w-full h-full bg-white border border-zinc-50 shadow-2xl rounded-[32px] flex flex-col items-center justify-center p-8">
@@ -126,7 +126,7 @@ export default function ConversationDeck() {
                 </div>
               </div>
             ) : (
-              <div className="min-h-[75vh] flex flex-col items-center justify-center bg-zinc-50 rounded-[40px] text-zinc-300 border border-dashed border-zinc-200 px-8 text-center">
+              <div className="min-h-[70vh] flex flex-col items-center justify-center bg-zinc-50 rounded-[40px] text-zinc-300 border border-dashed border-zinc-200 px-8 text-center">
                 <span className="text-sm font-bold tracking-widest uppercase text-zinc-400">会話カードを登録してください</span>
               </div>
             )}
@@ -159,7 +159,7 @@ export default function ConversationDeck() {
                   placeholder="新しい会話デッキ名..." 
                   value={newDeckName} 
                   onChange={(e) => setNewDeckName(e.target.value)} 
-                  className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5" // text-baseでズーム防止
+                  className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5"
                 />
                 <Button onClick={addDeck} className="bg-zinc-900 text-white h-14 w-14 rounded-2xl shrink-0"><Plus size={24}/></Button>
               </div>
@@ -182,11 +182,11 @@ export default function ConversationDeck() {
                       placeholder="会話カードを追加..." 
                       value={newCardText} 
                       onChange={(e) => setNewCardText(e.target.value)} 
-                      className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5" // text-baseでズーム防止
+                      className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5"
                     />
                     <Button onClick={addCard} className="bg-zinc-100 text-zinc-900 h-14 w-14 rounded-2xl shrink-0"><Plus size={24}/></Button>
                   </div>
-                  <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-2 max-h-[35vh] overflow-y-auto pr-2 custom-scrollbar">
                     {selectedDeck?.cards?.map((c) => (
                       <div key={c.id} className="flex justify-between items-center p-5 bg-white rounded-2xl border border-zinc-100 shadow-sm">
                         <span className="text-sm text-zinc-600 font-bold">{c.text}</span>
@@ -200,6 +200,62 @@ export default function ConversationDeck() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* 使い方ボタン */}
+      <footer className="py-4 flex justify-center">
+        <Button 
+          variant="ghost" 
+          onClick={() => setIsHelpOpen(true)}
+          className="text-zinc-300 hover:text-zinc-900 hover:bg-transparent text-[10px] font-bold tracking-widest gap-1 transition-colors"
+        >
+          <HelpCircle size={14} /> 使い方
+        </Button>
+      </footer>
+
+      {/* 使い方モーダル */}
+      <AnimatePresence>
+        {isHelpOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            onClick={() => setIsHelpOpen(false)}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-8"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }} 
+              animate={{ scale: 1, y: 0 }} 
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl border border-zinc-100 space-y-6 relative"
+            >
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsHelpOpen(false)}
+                className="absolute top-6 right-6 text-zinc-300 hover:text-zinc-900 rounded-full"
+              >
+                <X size={20} />
+              </Button>
+
+              <h2 className="text-xl font-bold text-zinc-900 border-b border-zinc-50 pb-4">Dialogue Deck の使い方</h2>
+              
+              <div className="space-y-5 text-sm text-zinc-600 leading-relaxed font-medium">
+                <p>1. <strong>「編成」タブ</strong>で新しい会話デッキを作成し、会話カードを追加してください。</p>
+                <p>2. <strong>「選択」タブ</strong>で使用したいデッキをタップして選びます。</p>
+                <p>3. <strong>「PLAY」タブ</strong>でカードをタップ、またはスワイプして次の話題へ進みましょう。</p>
+              </div>
+
+              <Button 
+                onClick={() => setIsHelpOpen(false)} 
+                className="w-full bg-zinc-900 text-white rounded-2xl h-14 font-bold shadow-lg shadow-zinc-200 active:scale-95 transition-all"
+              >
+                対話を始める
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   )
 }
