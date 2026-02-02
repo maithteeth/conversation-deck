@@ -75,7 +75,8 @@ export default function ConversationDeck() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-center mb-4">
             <TabsList className="bg-zinc-100/50 p-1 rounded-xl h-11 w-full max-w-[320px]">
-              <TabsTrigger value="play" className="w-full rounded-lg py-1.5 text-xs font-bold data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-zinc-400 transition-all uppercase">PLAY</TabsTrigger>
+              {/* PLAYタブをクールな黒へ変更 */}
+              <TabsTrigger value="play" className="w-full rounded-lg py-1.5 text-xs font-bold data-[state=active]:bg-zinc-900 data-[state=active]:text-white text-zinc-400 transition-all uppercase">PLAY</TabsTrigger>
               <TabsTrigger value="select" className="w-full rounded-lg py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-zinc-900 text-zinc-400 transition-all">選択</TabsTrigger>
               <TabsTrigger value="edit" className="w-full rounded-lg py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-zinc-900 text-zinc-400 transition-all">編成</TabsTrigger>
             </TabsList>
@@ -92,13 +93,14 @@ export default function ConversationDeck() {
                       initial={{ opacity: 0, x: direction >= 0 ? 300 : -300 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: direction >= 0 ? -300 : 300 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 32 }}
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }} // 剛性を高めてシュパッと動作
                       drag="x"
                       dragConstraints={{ left: 0, right: 0 }}
                       onDragEnd={(_, info) => {
                         if (info.offset.x < -100) paginate(1)
                         else if (info.offset.x > 100) paginate(-1)
                       }}
+                      onClick={() => paginate(1)} // タップでも次へ移動
                       className="absolute inset-0 cursor-grab active:cursor-grabbing"
                     >
                       <Card className="w-full h-full bg-white border border-zinc-50 shadow-2xl rounded-[32px] flex flex-col items-center justify-center p-8">
@@ -153,7 +155,12 @@ export default function ConversationDeck() {
             <section className="space-y-3">
               <h3 className="text-[10px] font-bold text-zinc-300 tracking-[0.2em] uppercase">会話デッキを新規作成</h3>
               <div className="flex gap-2">
-                <Input placeholder="新しい会話デッキ名..." value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-sm px-5" />
+                <Input 
+                  placeholder="新しい会話デッキ名..." 
+                  value={newDeckName} 
+                  onChange={(e) => setNewDeckName(e.target.value)} 
+                  className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5" // text-baseでズーム防止
+                />
                 <Button onClick={addDeck} className="bg-zinc-900 text-white h-14 w-14 rounded-2xl shrink-0"><Plus size={24}/></Button>
               </div>
             </section>
@@ -171,7 +178,12 @@ export default function ConversationDeck() {
               {selectedDeck && (
                 <div className="space-y-4">
                   <div className="flex gap-2">
-                    <Input placeholder="会話カードを追加..." value={newCardText} onChange={(e) => setNewCardText(e.target.value)} className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-sm px-5" />
+                    <Input 
+                      placeholder="会話カードを追加..." 
+                      value={newCardText} 
+                      onChange={(e) => setNewCardText(e.target.value)} 
+                      className="bg-zinc-50 border-none h-14 rounded-2xl shadow-inner text-base px-5" // text-baseでズーム防止
+                    />
                     <Button onClick={addCard} className="bg-zinc-100 text-zinc-900 h-14 w-14 rounded-2xl shrink-0"><Plus size={24}/></Button>
                   </div>
                   <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
