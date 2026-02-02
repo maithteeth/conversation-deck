@@ -1,11 +1,10 @@
 "use client"
-
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RotateCcw, Shuffle } from "lucide-react" // 標準的なアイコンですわ
+import { RotateCcw, Shuffle } from "lucide-react"
 
 type Deck = { id: string; name: string; cards: string[] }
 
@@ -15,7 +14,7 @@ export default function Home() {
   const [newCardText, setNewCardText] = useState("")
   const [newDeckName, setNewDeckName] = useState("")
   const [displayIndex, setDisplayIndex] = useState(0)
-  const [isFlipped, setIsFlipped] = useState(false) // 反転の記憶
+  const [isFlipped, setIsFlipped] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem("conv-decks")
@@ -35,9 +34,7 @@ export default function Home() {
   const addDeck = () => {
     if (!newDeckName) return
     const newDeck = { id: Date.now().toString(), name: newDeckName, cards: [] }
-    setDecks([...decks, newDeck])
-    setNewDeckName("")
-    setCurrentDeckId(newDeck.id)
+    setDecks([...decks, newDeck]); setNewDeckName(""); setCurrentDeckId(newDeck.id)
   }
 
   const addCard = () => {
@@ -54,72 +51,41 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-6 bg-zinc-950 text-zinc-50">
-      <h1 className="text-xl font-bold mb-8 tracking-tighter opacity-50">CONVERSATION DECK</h1>
-
+    <main className="flex min-h-[100dvh] flex-col items-center p-6 bg-zinc-950 text-zinc-50 overflow-x-hidden">
+      <h1 className="text-xl font-bold mb-4 tracking-tighter opacity-50 uppercase">Conversation Deck</h1>
       <Tabs defaultValue="play" className="w-full max-w-md">
-        <TabsList className="grid w-full grid-cols-2 bg-zinc-900">
-          <TabsTrigger value="play">演武（Play）</TabsTrigger>
-          <TabsTrigger value="manage">編纂（Manage）</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-zinc-900 mb-4">
+          <TabsTrigger value="play">演武</TabsTrigger>
+          <TabsTrigger value="manage">編纂</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="play" className="space-y-4 py-4">
+        <TabsContent value="play" className="space-y-4">
           <div className="flex gap-2">
-            <select 
-              value={currentDeckId} 
-              onChange={(e) => { setCurrentDeckId(e.target.value); setDisplayIndex(0); }}
-              className="flex-1 bg-zinc-900 border border-zinc-800 rounded-md p-2 text-sm"
-            >
+            <select value={currentDeckId} onChange={(e) => { setCurrentDeckId(e.target.value); setDisplayIndex(0); }} className="flex-1 bg-zinc-900 border border-zinc-800 rounded-md p-2 text-base">
               {decks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
-            <Button variant="outline" size="icon" onClick={shuffleDeck} className="border-zinc-800 bg-zinc-900">
-              <Shuffle className="h-4 w-4" />
-            </Button>
+            <Button variant="outline" size="icon" onClick={shuffleDeck} className="border-zinc-800 bg-zinc-900"><Shuffle className="h-4 w-4" /></Button>
           </div>
-
           <Card className={`border-zinc-800 bg-zinc-900 shadow-2xl transition-transform duration-500 ${isFlipped ? 'rotate-180' : ''}`}>
-            <CardContent className="py-20 flex items-center justify-center min-h-[240px]">
-              <p className="text-2xl font-bold text-center leading-relaxed px-4">
-                {currentDeck?.cards[displayIndex] || "カードがありませんわ"}
-              </p>
-            </CardContent>
+            <CardContent className="py-16 flex items-center justify-center min-h-[280px]"><p className="text-2xl font-bold text-center leading-relaxed px-4">{currentDeck?.cards[displayIndex] || "カードがありませんわ"}</p></CardContent>
           </Card>
-
-          <div className="flex justify-between items-center gap-4 mt-6">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsFlipped(!isFlipped)}
-              className="border-zinc-800 bg-zinc-900"
-            >
-              <RotateCcw className="mr-2 h-4 w-4" /> 向きを反転
-            </Button>
-            <Button 
-              onClick={() => setDisplayIndex(prev => (prev + 1) % (currentDeck?.cards.length || 1))}
-              className="flex-1 bg-zinc-100 text-zinc-900 hover:bg-zinc-300 font-bold"
-            >
-              次の話題へ
-            </Button>
+          <div className="flex justify-between items-center gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsFlipped(!isFlipped)} className="border-zinc-800 bg-zinc-900"><RotateCcw className="mr-2 h-4 w-4" /> 反転</Button>
+            <Button onClick={() => setDisplayIndex(prev => (prev + 1) % (currentDeck?.cards.length || 1))} className="flex-1 bg-zinc-100 text-zinc-900 font-bold">次へ</Button>
           </div>
         </TabsContent>
-
-        <TabsContent value="manage" className="space-y-6 py-4">
+        <TabsContent value="manage" className="space-y-6">
           <div className="flex gap-2">
-            <Input placeholder="新デッキ名" value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} className="bg-zinc-900 border-zinc-800" />
+            <Input placeholder="新デッキ名" value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} className="bg-zinc-900 border-zinc-800 text-base" />
             <Button onClick={addDeck}>作成</Button>
           </div>
           {currentDeck && (
             <div className="space-y-4 border-t border-zinc-800 pt-4">
-              <div className="flex justify-between items-center">
-                <h2 className="font-bold text-zinc-400">編集中のデッキ: {currentDeck.name}</h2>
-              </div>
               <div className="flex gap-2">
-                <Input placeholder="新しい話題を追加" value={newCardText} onChange={(e) => setNewCardText(e.target.value)} className="bg-zinc-900 border-zinc-800" />
+                <Input placeholder="話題を追加" value={newCardText} onChange={(e) => setNewCardText(e.target.value)} className="bg-zinc-900 border-zinc-800 text-base" />
                 <Button onClick={addCard} variant="secondary">追加</Button>
               </div>
               <ul className="space-y-2 max-h-60 overflow-y-auto">
-                {currentDeck.cards.map((c, i) => (
-                  <li key={i} className="text-sm p-3 bg-zinc-900 rounded border border-zinc-800">{c}</li>
-                ))}
+                {currentDeck.cards.map((c, i) => (<li key={i} className="text-sm p-3 bg-zinc-900 rounded border border-zinc-800">{c}</li>))}
               </ul>
             </div>
           )}
